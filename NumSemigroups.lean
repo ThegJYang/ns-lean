@@ -1,2 +1,5 @@
 import NumSemigroups.Basic
 import NumSemigroups.PaperClaims
+import NumSemigroups.Defs
+import NumSemigroups.Factorization
+import NumSemigroups.Elasticity
