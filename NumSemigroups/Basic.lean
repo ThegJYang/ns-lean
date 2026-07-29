@@ -157,3 +157,32 @@ def genusApery (gens : List Nat) : Nat :=
   let dist := aperySet gens m
   let total := (List.range m).foldl (fun acc r => acc + (dist[r]!).getD 0) 0
   (2 * total - m * (m - 1)) / (2 * m)
+
+/-- The gaps: positive numbers up to `bound` that are NOT in the semigroup.
+Builds the reachability table ONCE and reads it out, rather than calling
+`canMake` per number — `canMake gens n` rebuilds the whole table from
+scratch each time, which would make this quadratic in `bound`. -/
+def gapsUpTo (gens : List Nat) (bound : Nat) : List Nat :=
+  let reach := reachTable gens bound
+  (List.range (bound + 1)).filter (fun n => n ≠ 0 && !(reach[n]!))
+
+/-- The genus: how many gaps there are, searching up to `bound`.
+NOTE: `genusApery` already computes this with no bound at all. Keep this
+only as a cross-check on that function (see the example below). -/
+def genusUpTo (gens : List Nat) (bound : Nat) : Nat :=
+  (gapsUpTo gens bound).length
+
+/-- The conductor, searched up to `bound`: smallest `c` with every `n ≥ c`
+representable. Equals the Frobenius number + 1. -/
+def conductorUpTo (gens : List Nat) (bound : Nat) : Nat :=
+  frobeniusUpTo gens bound + 1
+
+/-- The conductor, bound-free — uses the Apéry-based `frobeniusNumber`, so
+no search window has to be chosen. Prefer this one. -/
+def conductor (gens : List Nat) : Nat :=
+  frobeniusNumber gens + 1
+
+/-- The multiplicity: the smallest generator. Assumes `gens` is nonempty
+and all generators are positive. -/
+def multiplicity (gens : List Nat) : Nat :=
+  gens.foldl Nat.min gens.head!

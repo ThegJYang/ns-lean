@@ -292,3 +292,24 @@ theorem sqfib_case3_n4 : frobeniusNumber [9, 25, 64] = 130 := by native_decide
 -- collapses to ⟨4,9⟩ (embedding dimension drops to 2), so Sylvester
 -- applies: 4·9 - 4 - 9 = 23. Outside the three-case split above.
 theorem sqfib_degenerate_n3 : frobeniusNumber [4, 9, 25] = 23 := by native_decide
+
+-- The handout's three required tests, on <3,5,7>: gaps {1,2,4}, genus 3,
+-- Frobenius 4, conductor 5.
+/-example : gapsUpTo [3, 5, 7] 20 = [1, 2, 4] := by native_decide
+example : genusUpTo [3, 5, 7] 20 = 3 := by native_decide
+example : conductorUpTo [3, 5, 7] 20 = 5 := by native_decide
+
+-- Bound-free versions agree.
+example : conductor [3, 5, 7] = 5 := by native_decide
+example : multiplicity [3, 5, 7] = 3 := by native_decide
+
+-- Stretch: <4,6,9> has Frobenius number 11, so conductor 12.
+example : conductorUpTo [4, 6, 9] 30 = 12 := by native_decide
+example : conductor [4, 6, 9] = 12 := by native_decide
+example : multiplicity [4, 6, 9] = 4 := by native_decide
+
+-- The check worth having: the new bounded genus agrees with the existing
+-- bound-free one. This doubles as a regression test on the Apéry core.
+example : genusUpTo [3, 5, 7] 20 = genusApery [3, 5, 7] := by native_decide
+example : genusUpTo [4, 6, 9] 30 = genusApery [4, 6, 9] := by native_decide
+example : genusUpTo [6, 9, 20] 60 = genusApery [6, 9, 20] := by native_decide-/
