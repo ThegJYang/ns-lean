@@ -104,5 +104,56 @@ def rigorousBoundFull (gens : List Nat) : Nat :=
 
 /-- Frobenius number of `gens`, always rigorously bounded — falling back
 to the constructive proof only when needed. -/
-def frobeniusNumber (gens : List Nat) : Nat :=
+def OLDfrobeniusNumber (gens : List Nat) : Nat :=
   frobeniusUpTo gens (rigorousBoundFull gens)
+
+/-- One residue's turn: if we've already found some way to reach it,
+try extending by each generator and see if that beats the current best
+route to the resulting residue. -/
+def relaxResidue (gens : List Nat) (m : Nat) (dist : Array (Option Nat)) (r : Nat) :
+    Array (Option Nat) :=
+  match dist[r]! with
+  | none => dist
+  | some d =>
+    gens.foldl
+      (fun acc g =>
+        let r' := (r + g) % m
+        let cand := d + g
+        match acc[r']! with
+        | none => acc.set! r' (some cand)
+        | some cur => if cand < cur then acc.set! r' (some cand) else acc)
+      dist
+
+/-- One full round: relax every residue once, in order. -/
+def relaxRound (gens : List Nat) (m : Nat) (dist : Array (Option Nat)) :
+    Array (Option Nat) :=
+  (List.range m).foldl (relaxResidue gens m) dist
+
+/-- The Apéry set of the smallest generator: for each residue r mod m,
+the smallest semigroup element congruent to r. Computed by repeated
+relaxation — since every generator is a strictly positive step, the
+true shortest route to any residue never needs to revisit the same
+residue twice (that would only add cost for no benefit), so it uses at
+most m-1 steps. Hence m-1 full rounds of relaxation are always enough
+to reach the final, correct answer. -/
+def aperySet (gens : List Nat) (m : Nat) : Array (Option Nat) :=
+  let init : Array (Option Nat) := (Array.replicate m none).set! 0 (some 0)
+  (List.range (m - 1)).foldl (fun acc _ => relaxRound gens m acc) init
+
+/-- Frobenius number via the Apéry set. Same underlying idea as
+frobeniusUpTo, but bounded by the smallest generator instead of by the
+Frobenius number itself — so it stays fast even when F is astronomical. -/
+def frobeniusNumber (gens : List Nat) : Nat :=
+  let m := gens.foldl Nat.min gens.head!
+  let dist := aperySet gens m
+  let reps := (List.range m).drop 1 |>.map (fun r => (dist[r]!).getD 0)
+  reps.foldr Nat.max 0 - m
+
+/-- Genus via the same Apéry set: g(S) = (1/m)(sum of the Apéry set) -
+(m-1)/2, written over a common denominator so Nat's truncating
+division doesn't corrupt the result along the way. -/
+def genusApery (gens : List Nat) : Nat :=
+  let m := gens.foldl Nat.min gens.head!
+  let dist := aperySet gens m
+  let total := (List.range m).foldl (fun acc r => acc + (dist[r]!).getD 0) 0
+  (2 * total - m * (m - 1)) / (2 * m)
