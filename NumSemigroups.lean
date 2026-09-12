@@ -1,4 +1,7 @@
 import NumSemigroups.Basic
+import NumSemigroups.AperyCorrect
+import NumSemigroups.AperyCheck
+import NumSemigroups.AperyComplete
 import NumSemigroups.PaperClaims
 import NumSemigroups.Defs
 import NumSemigroups.Factorization

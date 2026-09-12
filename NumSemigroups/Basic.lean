@@ -1,3 +1,10 @@
+namespace NumSemigroups
+
+-- This file is wrapped in the `NumSemigroups` namespace.  It used to sit in the
+-- root namespace, which was safe only because it has no imports.  Once it is
+-- imported alongside Mathlib -- as AperyCorrect, AperyCheck and AperyComplete
+-- all do -- the root names `multiplicity` and `conductor` clash with Mathlib's
+-- own and Lean refuses to merge the environments.
 def reachTable (gens : List Nat) (bound : Nat) : Array Bool :=
   (List.range (bound + 1)).foldl
     (fun acc n =>
@@ -140,23 +147,39 @@ def aperySet (gens : List Nat) (m : Nat) : Array (Option Nat) :=
   let init : Array (Option Nat) := (Array.replicate m none).set! 0 (some 0)
   (List.range (m - 1)).foldl (fun acc _ => relaxRound gens m acc) init
 
+/-- The multiplicity: the smallest generator. Assumes `gens` is nonempty
+and all generators are positive.
+
+Defined here, above its uses, so that `frobeniusNumber` and `genusApery`
+can be *stated* in terms of it. The correctness proofs in
+`AperyCorrect.lean` / `AperyCheck.lean` are phrased against
+`multiplicity gens`, and they only go through if the executable
+definitions use the same term rather than re-inlining the fold. -/
+def multiplicity (gens : List Nat) : Nat :=
+  gens.foldl Nat.min gens.head!
+
 /-- Frobenius number via the Apéry set. Same underlying idea as
 frobeniusUpTo, but bounded by the smallest generator instead of by the
 Frobenius number itself — so it stays fast even when F is astronomical. -/
 def frobeniusNumber (gens : List Nat) : Nat :=
-  let m := gens.foldl Nat.min gens.head!
+  let m := multiplicity gens
   let dist := aperySet gens m
   let reps := (List.range m).drop 1 |>.map (fun r => (dist[r]!).getD 0)
   reps.foldr Nat.max 0 - m
 
-/-- Genus via the same Apéry set: g(S) = (1/m)(sum of the Apéry set) -
-(m-1)/2, written over a common denominator so Nat's truncating
-division doesn't corrupt the result along the way. -/
+/-- Genus via the same Apéry set (Brauer–Shockley).
+
+Summed as `∑_r w r / m`, one exact division per residue, rather than as
+`(2·total - m(m-1)) / (2m)`. The two agree on every input — each `w r`
+is congruent to `r` mod `m`, so the per-residue divisions are exact and
+the rounding in the old form was never doing any work — but this shape
+has no truncated subtraction and no `2 * total` intermediate, and it is
+what the counting argument produces directly. That makes it provable:
+see `AperyCert.genus` in `AperyCorrect.lean`. -/
 def genusApery (gens : List Nat) : Nat :=
-  let m := gens.foldl Nat.min gens.head!
+  let m := multiplicity gens
   let dist := aperySet gens m
-  let total := (List.range m).foldl (fun acc r => acc + (dist[r]!).getD 0) 0
-  (2 * total - m * (m - 1)) / (2 * m)
+  (List.range m).foldl (fun acc r => acc + (dist[r]!).getD 0 / m) 0
 
 /-- The gaps: positive numbers up to `bound` that are NOT in the semigroup.
 Builds the reachability table ONCE and reads it out, rather than calling
@@ -182,7 +205,4 @@ no search window has to be chosen. Prefer this one. -/
 def conductor (gens : List Nat) : Nat :=
   frobeniusNumber gens + 1
 
-/-- The multiplicity: the smallest generator. Assumes `gens` is nonempty
-and all generators are positive. -/
-def multiplicity (gens : List Nat) : Nat :=
-  gens.foldl Nat.min gens.head!
+end NumSemigroups

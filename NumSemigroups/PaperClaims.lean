@@ -1,4 +1,14 @@
 import NumSemigroups.Basic
+import NumSemigroups.AperyCheck
+
+open NumSemigroups
+
+set_option maxRecDepth 400000
+-- The theorems below are proved by `decide`, so the kernel evaluates the whole
+-- Apery table for each one. That recurses far past the default depth of 512.
+-- This is elaborator stack depth, not kernel trust: raising it changes nothing
+-- about what is checked. The expensive declarations additionally raise
+-- `maxHeartbeats`, scoped individually.
 
 /- ═══════════════════════════════════════════════════════════════════
    PAPER 1 — Fibonacci numerical semigroups
@@ -11,26 +21,55 @@ import NumSemigroups.Basic
 
 -- Case 1a: r = 0. Formula collapses to the 2-generator Sylvester value;
 -- third generator is always redundant here. (i,k) = (5,5).
-theorem fib_case1a_i5_k5 : frobeniusNumber [5, 13, 55] = 47 := by native_decide
+theorem fib_case1a_i5_k5 : IsGreatest {n : ℕ | ¬ InSG [5, 13, 55] n} 47 := by
+  have h : frobeniusNumber [5, 13, 55] = 47 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 13, 55] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 1a again, (i,k) = (3,6), smallest instance.
-theorem fib_case1a_i3_k6 : frobeniusNumber [2, 5, 34] = 3 := by native_decide
+theorem fib_case1a_i3_k6 : IsGreatest {n : ℕ | ¬ InSG [2, 5, 34] n} 3 := by
+  have h : frobeniusNumber [2, 5, 34] = 3 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [2, 5, 34] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 1b: r ≥ 1 and F_{k-2}·F_i < (F_i - r·F_k)·F_{i+2}. (i,k) = (5,3).
-theorem fib_case1b_i5_k3 : frobeniusNumber [5, 13, 21] = 37 := by native_decide
+theorem fib_case1b_i5_k3 : IsGreatest {n : ℕ | ¬ InSG [5, 13, 21] n} 37 := by
+  have h : frobeniusNumber [5, 13, 21] = 37 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 13, 21] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 1b, second data point, (i,k) = (7,6).
-theorem fib_case1b_i7_k6 : frobeniusNumber [13, 34, 233] = 356 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 13: the kernel evaluates an Apery table of 507 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem fib_case1b_i7_k6 : IsGreatest {n : ℕ | ¬ InSG [13, 34, 233] n} 356 := by
+  have h : frobeniusNumber [13, 34, 233] = 356 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [13, 34, 233] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 2 ("otherwise"): r ≥ 1 and F_{k-2}·F_i ≥ (F_i - r·F_k)·F_{i+2}.
 -- (11,6) is the SMALLEST instance of this case that exists — k=3,4,5 can
 -- never reach it, and k=6 needs F_i ≡ 1 (mod 8), first hit at F_11 = 89.
-theorem fib_case2_i11_k6 : frobeniusNumber [89, 233, 1597] = 17512 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 89: the kernel evaluates an Apery table of 23,763 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem fib_case2_i11_k6 : IsGreatest {n : ℕ | ¬ InSG [89, 233, 1597] n} 17512 := by
+  have h : frobeniusNumber [89, 233, 1597] = 17512 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [89, 233, 1597] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Corollary 1.2 gives genus as a SINGLE formula with no case split, even
 -- though F has two branches — worth an independent look. For (5,3):
 -- N = ((F_i-1)(F_{i+2}-1) - r·F_{k-2}(2F_i - F_k(1+r)))/2 = (4·12 - 2(10-6))/2 = 20.
-theorem fib_genus_i5_k3 : genusApery [5, 13, 21] = 20 := by native_decide
+theorem fib_genus_i5_k3 : Set.ncard {n : ℕ | ¬ InSG [5, 13, 21] n} = 20 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [5, 13, 21] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
 
 
 /- ═══════════════════════════════════════════════════════════════════
@@ -41,27 +80,65 @@ theorem fib_genus_i5_k3 : genusApery [5, 13, 21] = 20 := by native_decide
    ═══════════════════════════════════════════════════════════════════ -/
 
 -- Case n = 0 (Lemma 4.9): F = 2^k + 1. GT(0,3) = ⟨2,11⟩ (Example 3.8).
-theorem thabit_n0 : frobeniusNumber [2, 11] = 9 := by native_decide
+theorem thabit_n0 : IsGreatest {n : ℕ | ¬ InSG [2, 11] n} 9 := by
+  have h : frobeniusNumber [2, 11] = 9 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [2, 11] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case k = n ≥ 1 (Lemma 4.10). GT(2,2), generators from Theorem 3.6.
-theorem thabit_kEqn : frobeniusNumber [17, 37, 77, 157, 317] = 337 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 17: the kernel evaluates an Apery table of 1,445 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem thabit_kEqn : IsGreatest {n : ℕ | ¬ InSG [17, 37, 77, 157, 317] n} 337 := by
+  have h : frobeniusNumber [17, 37, 77, 157, 317] = 337 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [17, 37, 77, 157, 317] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case k = n - 1 (Corollary 4.12). GT(3,2), generators from Example 3.9.
-theorem thabit_kEqnMinus1 :
-    frobeniusNumber [37, 77, 157, 317, 637, 1277] = 1551 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 37: the kernel evaluates an Apery table of 8,214 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem thabit_kEqnMinus1 : IsGreatest {n : ℕ | ¬ InSG [37, 77, 157, 317, 637, 1277] n} 1551 := by
+  have h : frobeniusNumber [37, 77, 157, 317, 637, 1277] = 1551 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [37, 77, 157, 317, 637, 1277] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 2 ≤ k < n, general (§4.2, Examples 4.14 / 4.18).
+-- NOT KERNEL-CHECKED. Smallest generator is 281, so the kernel would have to
+-- evaluate an Apery table roughly 141x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem thabit_kLtN_ex1 :
     frobeniusNumber [281, 569, 1145, 2297, 4601, 9209, 18425, 36857, 73721]
       = 81483 := by native_decide
 
 -- Case 2 ≤ k < n, general (§4.2, Example 4.19).
+-- NOT KERNEL-CHECKED. Smallest generator is 1145, so the kernel would have to
+-- evaluate an Apery table roughly 2860x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem thabit_kLtN_ex2 :
     frobeniusNumber [1145, 2297, 4601, 9209, 18425, 36857, 73721, 147449,
       294905, 589817, 1179641] = 1325903 := by native_decide
 
 -- Case n ≠ 0, k > n, k ≠ 2 (§4.3, Example 4.26).
-theorem thabit_kGtN : frobeniusNumber [29, 65, 137, 281, 569] = 1095 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 29: the kernel evaluates an Apery table of 4,205 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem thabit_kGtN : IsGreatest {n : ℕ | ¬ InSG [29, 65, 137, 281, 569] n} 1095 := by
+  have h : frobeniusNumber [29, 65, 137, 281, 569] = 1095 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [29, 65, 137, 281, 569] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- NOT COVERED: the paper's genuine exception case (n,k) = (1,2),
 -- GT(1,2) = ⟨7,17,37⟩ — the source text never resolves it.
@@ -77,20 +154,38 @@ theorem thabit_kGtN : frobeniusNumber [29, 65, 137, 281, 569] = 1095 := by nativ
 
 -- Case 1 (Theorem 3.5): general family a_i = b^i·a + (b^i-1)/(b-1)·d,
 -- requires gcd(a,d)=1 and a ≥ k-1. Instance b=2, d=3, k=2, a=5.
-theorem grepunit_thm35 : frobeniusNumber [5, 13, 29] = 37 := by native_decide
+theorem grepunit_thm35 : IsGreatest {n : ℕ | ¬ InSG [5, 13, 29] n} 37 := by
+  have h : frobeniusNumber [5, 13, 29] = 37 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 13, 29] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
-theorem grepunit_thm35_genus : genusApery [5, 13, 29] = 20 := by native_decide
+theorem grepunit_thm35_genus : Set.ncard {n : ℕ | ¬ InSG [5, 13, 29] n} = 20 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [5, 13, 29] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
 
 -- Case 2 (Theorem 4.1): generalized-repunit specialization, k = n-1,
 -- a = (b^n-1)/(b-1). F = (b^n + d - 1)(b^n-1)/(b-1) - d.
 -- Instance b=2, n=3, d=3 → a=7.
-theorem grepunit_thm41 : frobeniusNumber [7, 17, 37] = 67 := by native_decide
+theorem grepunit_thm41 : IsGreatest {n : ℕ | ¬ InSG [7, 17, 37] n} 67 := by
+  have h : frobeniusNumber [7, 17, 37] = 67 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [7, 17, 37] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
-theorem grepunit_thm41_genus : genusApery [7, 17, 37] = 38 := by native_decide
+theorem grepunit_thm41_genus : Set.ncard {n : ℕ | ¬ InSG [7, 17, 37] n} = 38 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [7, 17, 37] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
 
 -- Case 3 (Corollary 4.2): classical repunit sub-case, d = 1.
 -- b=2, n=3 → ⟨7,15,31⟩. The F formula is correct: 7·8 - 1 = 55.
-theorem grepunit_cor42_frobenius : frobeniusNumber [7, 15, 31] = 55 := by native_decide
+theorem grepunit_cor42_frobenius : IsGreatest {n : ℕ | ¬ InSG [7, 15, 31] n} 55 := by
+  have h : frobeniusNumber [7, 15, 31] = 55 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [7, 15, 31] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 /- ⚠ DISCREPANCY — Corollary 4.2's GENUS formula.
    As printed: g = (b^n/2)·((b^n-1)/(b-1) + n - 1), giving (8/2)(7+2) = 36.
@@ -100,7 +195,10 @@ theorem grepunit_cor42_frobenius : frobeniusNumber [7, 15, 31] = 55 := by native
    whenever b^n is odd (e.g. b=3,n=2 gives 22.5) — an immediate red flag,
    since genus must be an integer. Theorem 4.1 itself is fine; only the
    Corollary's specialization is wrong. -/
-theorem grepunit_cor42_genus_TRUE : genusApery [7, 15, 31] = 32 := by native_decide
+theorem grepunit_cor42_genus_TRUE : Set.ncard {n : ℕ | ¬ InSG [7, 15, 31] n} = 32 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [7, 15, 31] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
 
 
 /- ═══════════════════════════════════════════════════════════════════
@@ -122,7 +220,14 @@ theorem grepunit_cor42_genus_TRUE : genusApery [7, 15, 31] = 32 := by native_dec
 
 -- Master theorem (Corollary 5.1) via Example 5.2(1): x_n = a^n - 1,
 -- a=3, n=3 → F = a^n·R_n - 1 = 27·13 - 1 = 350.
-theorem linrec_cor51 : frobeniusNumber [13, 40, 121] = 350 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 13: the kernel evaluates an Apery table of 507 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem linrec_cor51 : IsGreatest {n : ℕ | ¬ InSG [13, 40, 121] n} 350 := by
+  have h : frobeniusNumber [13, 40, 121] = 350 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [13, 40, 121] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 /- ⚠ DISCREPANCY — Example 5.2(2), family x_n = 5·3^n - 1 (λ=2).
    The paper's derivation of max Ap(S_n, s_0) = 2s_n + s_{n+1} is correct,
@@ -132,31 +237,75 @@ theorem linrec_cor51 : frobeniusNumber [13, 40, 121] = 350 := by native_decide
    At n=2: formula gives 181, correct value is 989.
    Correct closed form: F = (25·3^(2n) - 5·3^n - 2)/2.
    (The companion genus result, Example 6.2, IS correct.) -/
-theorem linrec_ex52_2_n1_TRUE :
-    frobeniusNumber [7, 22, 67, 202] = 104 := by native_decide
+theorem linrec_ex52_2_n1_TRUE : IsGreatest {n : ℕ | ¬ InSG [7, 22, 67, 202] n} 104 := by
+  have h : frobeniusNumber [7, 22, 67, 202] = 104 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [7, 22, 67, 202] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
-theorem linrec_ex52_2_n2_TRUE :
-    frobeniusNumber [22, 67, 202, 607, 1822] = 989 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 22: the kernel evaluates an Apery table of 2,420 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem linrec_ex52_2_n2_TRUE : IsGreatest {n : ℕ | ¬ InSG [22, 67, 202, 607, 1822] n} 989 := by
+  have h : frobeniusNumber [22, 67, 202, 607, 1822] = 989 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [22, 67, 202, 607, 1822] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Example 6.2 genus for the same family, n=1: g = ½(5n+6+25R_n)·3^n = 54.
-theorem linrec_ex62_genus : genusApery [7, 22, 67, 202] = 54 := by native_decide
+theorem linrec_ex62_genus : Set.ncard {n : ℕ | ¬ InSG [7, 22, 67, 202] n} = 54 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [7, 22, 67, 202] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
 
 -- Family x_n = (2^k - 1)·2^n - 1 with k > 2^n (§5, explicitly noted as
 -- not treated in the earlier literature). n=1, k=3.
 -- F = 2^(2n+2k) - 2^(2n+k) - 2^(n+k) - 1 = 256 - 32 - 16 - 1 = 207.
-theorem linrec_pow2_kGt : frobeniusNumber [13, 27, 55, 111] = 207 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 13: the kernel evaluates an Apery table of 676 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem linrec_pow2_kGt : IsGreatest {n : ℕ | ¬ InSG [13, 27, 55, 111] n} 207 := by
+  have h : frobeniusNumber [13, 27, 55, 111] = 207 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [13, 27, 55, 111] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Family x_n = (a^k - 1)·a^n - 1, a ≥ 3. Case k=1, n=1 (a=3):
 -- F = a^5 - 3a^4 + 2a^3 - a^2 + 3 = 243 - 243 + 54 - 9 + 3 = 48.
-theorem linrec_k1_n1 : frobeniusNumber [5, 17, 53] = 48 := by native_decide
+theorem linrec_k1_n1 : IsGreatest {n : ℕ | ¬ InSG [5, 17, 53] n} 48 := by
+  have h : frobeniusNumber [5, 17, 53] = 48 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 17, 53] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Same family, case k=1, n>1 (a=3, n=2).
-theorem linrec_k1_nGt1 : frobeniusNumber [17, 53, 161, 485] = 627 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 17: the kernel evaluates an Apery table of 1,156 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem linrec_k1_nGt1 : IsGreatest {n : ℕ | ¬ InSG [17, 53, 161, 485] n} 627 := by
+  have h : frobeniusNumber [17, 53, 161, 485] = 627 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [17, 53, 161, 485] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Same family, case n=1, k>1, k ≤ a+1 (a=3, k=2).
-theorem linrec_n1_kSmall : frobeniusNumber [23, 71, 215, 647] = 1125 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 23: the kernel evaluates an Apery table of 2,116 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem linrec_n1_kSmall : IsGreatest {n : ℕ | ¬ InSG [23, 71, 215, 647] n} 1125 := by
+  have h : frobeniusNumber [23, 71, 215, 647] = 1125 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [23, 71, 215, 647] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Same family, case n=1, k>1, k > a+1 (a=3, k=5; threshold a+1=4).
+-- NOT KERNEL-CHECKED. Smallest generator is 725, so the kernel would have to
+-- evaluate an Apery table roughly 730x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem linrec_n1_kLarge :
     frobeniusNumber [725, 2177, 6533, 19601, 58805, 176417, 529253]
       = 1057773 := by native_decide
@@ -166,6 +315,13 @@ theorem linrec_n1_kLarge :
    F ("we do not write down explicitly"), so there is no published closed
    form to audit here — this theorem records the actual value instead.
    a=3, n=2, k=5 (R_n=4, threshold 8, k-2=3). -/
+-- NOT KERNEL-CHECKED. Smallest generator is 2177, so the kernel would have to
+-- evaluate an Apery table roughly 7518x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem linrec_nGt1_kSmall_NOFORMULA :
     frobeniusNumber [2177, 6533, 19601, 58805, 176417, 529253, 1587761, 4763285]
       = 9504780 := by native_decide
@@ -200,20 +356,40 @@ theorem linrec_nGt1_kSmall_NOFORMULA :
    ═══════════════════════════════════════════════════════════════════ -/
 
 -- k = 1 base case: reduces exactly to Sylvester (mn - m - n). m=2, n=3.
-theorem geom_k1 : frobeniusNumber [2, 3] = 1 := by native_decide
+theorem geom_k1 : IsGreatest {n : ℕ | ¬ InSG [2, 3] n} 1 := by
+  have h : frobeniusNumber [2, 3] = 1 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [2, 3] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- k = 2, m=2, n=3: g = 3·1 + 2·4·(2-3)/(2-3) = 3 + 8 = 11.
-theorem geom_k2 : frobeniusNumber [4, 6, 9] = 11 := by native_decide
+theorem geom_k2 : IsGreatest {n : ℕ | ¬ InSG [4, 6, 9] n} 11 := by
+  have h : frobeniusNumber [4, 6, 9] = 11 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [4, 6, 9] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- k = 3, m=2, n=3: g = 9·1 + 2·4·(4-9)/(2-3) = 9 + 40 = 49.
-theorem geom_k3 : frobeniusNumber [8, 12, 18, 27] = 49 := by native_decide
+theorem geom_k3 : IsGreatest {n : ℕ | ¬ InSG [8, 12, 18, 27] n} 49 := by
+  have h : frobeniusNumber [8, 12, 18, 27] = 49 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [8, 12, 18, 27] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- k = 2, m=2, n=5 (larger ratio): g = 5·3 + 4·4·(2-5)/(2-5) = 15 + 16 = 31.
-theorem geom_k2_alt : frobeniusNumber [4, 10, 25] = 31 := by native_decide
+theorem geom_k2_alt : IsGreatest {n : ℕ | ¬ InSG [4, 10, 25] n} 31 := by
+  have h : frobeniusNumber [4, 10, 25] = 31 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [4, 10, 25] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Symmetry check: swapping m and n gives the same generator SET, so the
 -- formula must agree. m=3, n=2, k=2 → {9,6,4}, same as geom_k2 above.
-theorem geom_swap : frobeniusNumber [9, 6, 4] = 11 := by native_decide
+theorem geom_swap : IsGreatest {n : ℕ | ¬ InSG [9, 6, 4] n} 11 := by
+  have h : frobeniusNumber [9, 6, 4] = 11 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [9, 6, 4] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 
 /- ═══════════════════════════════════════════════════════════════════
@@ -230,32 +406,82 @@ theorem geom_swap : frobeniusNumber [9, 6, 4] = 11 := by native_decide
    Harmless for the Apéry core (bounded by smallest generator, not by any
    coprime pair), but it's exactly the case that used to force the old
    core down its constructCoprimePartner fallback path. -/
-theorem tri_odd_n3 : frobeniusNumber [6, 10, 15] = 29 := by native_decide
+theorem tri_odd_n3 : IsGreatest {n : ℕ | ¬ InSG [6, 10, 15] n} 29 := by
+  have h : frobeniusNumber [6, 10, 15] = 29 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [6, 10, 15] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 2 — triangular, n EVEN (Proposition 6): F = (3n³+9n²+6n-4)/4. n=4.
-theorem tri_even_n4 : frobeniusNumber [10, 15, 21] = 89 := by native_decide
+theorem tri_even_n4 : IsGreatest {n : ℕ | ¬ InSG [10, 15, 21] n} 89 := by
+  have h : frobeniusNumber [10, 15, 21] = 89 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [10, 15, 21] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 3 — tetrahedral, n ≡ 0 (mod 6) (Proposition 12.1). n = 6.
-theorem tet_n0mod6 : frobeniusNumber [56, 84, 120, 165] = 1243 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 56: the kernel evaluates an Apery table of 12,544 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem tet_n0mod6 : IsGreatest {n : ℕ | ¬ InSG [56, 84, 120, 165] n} 1243 := by
+  have h : frobeniusNumber [56, 84, 120, 165] = 1243 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [56, 84, 120, 165] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 /- Case 4 — tetrahedral, n ≡ 1 (mod 6) (Proposition 12.2). n = 7.
    Second pairwise-non-coprime case: gcds are 12, 3, 4, 15, 20, 55 — again
    no individually coprime pair. -/
-theorem tet_n1mod6 : frobeniusNumber [84, 120, 165, 220] = 1571 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 84: the kernel evaluates an Apery table of 28,224 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem tet_n1mod6 : IsGreatest {n : ℕ | ¬ InSG [84, 120, 165, 220] n} 1571 := by
+  have h : frobeniusNumber [84, 120, 165, 220] = 1571 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [84, 120, 165, 220] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 5 — tetrahedral, n ≡ 2 (mod 6) (Proposition 12.3). n = 8.
+-- NOT KERNEL-CHECKED. Smallest generator is 120, so the kernel would have to
+-- evaluate an Apery table roughly 11x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem tet_n2mod6 : frobeniusNumber [120, 165, 220, 286] = 2619 := by native_decide
 
 -- Case 6 — tetrahedral, n ≡ 3 (mod 6) (Proposition 12.4). n = 9.
+-- NOT KERNEL-CHECKED. Smallest generator is 165, so the kernel would have to
+-- evaluate an Apery table roughly 22x the size of the largest one that is
+-- checked by `decide` in this file. That is not computationally feasible, so this
+-- claim uses `native_decide`: the result is computed by compiled code and trusted,
+-- which rests on the Lean compiler and runtime rather than on the kernel alone.
+-- `#print axioms` shows the extra axiom. Stated about the program's output, not
+-- about the semigroup, since the bridge needs the certificate.
 theorem tet_n3mod6 : frobeniusNumber [165, 220, 286, 364] = 5059 := by native_decide
 
 -- Case 7 — tetrahedral, n ≡ 4 (mod 6) (Proposition 12.5). REVERSE
 -- telescopic order (Proposition 11). n = 4.
-theorem tet_n4mod6 : frobeniusNumber [20, 35, 56, 84] = 253 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 20: the kernel evaluates an Apery table of 1,600 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem tet_n4mod6 : IsGreatest {n : ℕ | ¬ InSG [20, 35, 56, 84] n} 253 := by
+  have h : frobeniusNumber [20, 35, 56, 84] = 253 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [20, 35, 56, 84] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 8 — tetrahedral, n ≡ 5 (mod 6) (Proposition 12.6). Also reverse
 -- telescopic order. n = 5.
-theorem tet_n5mod6 : frobeniusNumber [35, 56, 84, 120] = 853 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 35: the kernel evaluates an Apery table of 4,900 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem tet_n5mod6 : IsGreatest {n : ℕ | ¬ InSG [35, 56, 84, 120] n} 853 := by
+  have h : frobeniusNumber [35, 56, 84, 120] = 853 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [35, 56, 84, 120] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 /- NOT FORMALIZABLE from this paper: Remark 13 sketches a 5-term family
    C(n,4),...,C(n+4,4) as telescopic for certain residues mod 12 but gives
@@ -278,20 +504,42 @@ theorem tet_n5mod6 : frobeniusNumber [35, 56, 84, 120] = 853 := by native_decide
 
 -- Case 1 — f_n even, n ≡ 0 (mod 3), n ≥ 6 (Cor. 5.16.1).
 -- n=6: ⟨8,13,21⟩ squared. Paper's own Example 5.17.3.
-theorem sqfib_case1_n6 : frobeniusNumber [64, 169, 441] = 3522 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 64: the kernel evaluates an Apery table of 12,288 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem sqfib_case1_n6 : IsGreatest {n : ℕ | ¬ InSG [64, 169, 441] n} 3522 := by
+  have h : frobeniusNumber [64, 169, 441] = 3522 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [64, 169, 441] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 2 — f_{n+1} even, n ≡ 2 (mod 3), n ≥ 5 (Cor. 5.16.2).
 -- n=5: ⟨5,8,13⟩ squared. Paper's own Example 5.17.2.
-theorem sqfib_case2_n5 : frobeniusNumber [25, 64, 169] = 743 := by native_decide
+set_option maxHeartbeats 4000000 in
+-- m = 25: the kernel evaluates an Apery table of 1,875 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem sqfib_case2_n5 : IsGreatest {n : ℕ | ¬ InSG [25, 64, 169] n} 743 := by
+  have h : frobeniusNumber [25, 64, 169] = 743 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [25, 64, 169] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Case 3 — f_{n+2} even, n ≡ 1 (mod 3), n ≥ 4 (Cor. 5.16.3).
 -- n=4: ⟨3,5,8⟩ squared. Paper's own Example 5.17.1.
-theorem sqfib_case3_n4 : frobeniusNumber [9, 25, 64] = 130 := by native_decide
+theorem sqfib_case3_n4 : IsGreatest {n : ℕ | ¬ InSG [9, 25, 64] n} 130 := by
+  have h : frobeniusNumber [9, 25, 64] = 130 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [9, 25, 64] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- Degenerate boundary case the paper calls out separately: S(3) = ⟨4,9,25⟩
 -- collapses to ⟨4,9⟩ (embedding dimension drops to 2), so Sylvester
 -- applies: 4·9 - 4 - 9 = 23. Outside the three-case split above.
-theorem sqfib_degenerate_n3 : frobeniusNumber [4, 9, 25] = 23 := by native_decide
+theorem sqfib_degenerate_n3 : IsGreatest {n : ℕ | ¬ InSG [4, 9, 25] n} 23 := by
+  have h : frobeniusNumber [4, 9, 25] = 23 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [4, 9, 25] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
 
 -- The handout's three required tests, on <3,5,7>: gaps {1,2,4}, genus 3,
 -- Frobenius 4, conductor 5.
@@ -313,3 +561,188 @@ example : multiplicity [4, 6, 9] = 4 := by native_decide
 example : genusUpTo [3, 5, 7] 20 = genusApery [3, 5, 7] := by native_decide
 example : genusUpTo [4, 6, 9] 30 = genusApery [4, 6, 9] := by native_decide
 example : genusUpTo [6, 9, 20] 60 = genusApery [6, 9, 20] := by native_decide-/
+
+
+
+/- ═══════════════════════════════════════════════════════════════════
+   PAPER 9 — The Frobenius problem for four numerical semigroups
+   arXiv:1706.09246 (Kyunghwan Song)
+   Four families, each with its own Apéry-set analysis:
+     Thabit base b        T_b(n)   = ⟨(b+1)·b^(n+i) − 1⟩, i = 0..n+1
+     Thabit 2nd kind      T_b'(n)  = ⟨(b+1)·b^(n+i) + 1⟩, i = 0..n+1
+     Cunningham           SC⁺(b,n) = ⟨b^(n+i) + 1⟩,       i = 0..n
+     Fermat base b        SF(b,n)  = ⟨b^(b^n)+1, b^(b^(n+1))+1⟩
+   Side conditions: 2nd kind needs b ≢ 1 (mod 3); Cunningham and Fermat
+   need b even. Method throughout: pin down which coefficient tuples give
+   Apéry elements, then F = max Ap − s₀ and g = (Σ Ap)/s₀ − (s₀−1)/2.
+   ═══════════════════════════════════════════════════════════════════ -/
+
+-- Family 1, Theorem 3.10. b = 3, n = 1 — the paper's own Example 3.20.3.
+theorem song_thabit_b3n1 : IsGreatest {n : ℕ | ¬ InSG [11, 35, 107] n} 273 := by
+  have h : frobeniusNumber [11, 35, 107] = 273 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [11, 35, 107] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 1, b = 2, n = 1.
+theorem song_thabit_b2n1 : IsGreatest {n : ℕ | ¬ InSG [5, 11, 23] n} 29 := by
+  have h : frobeniusNumber [5, 11, 23] = 29 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 11, 23] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 1, b = 2, n = 2.
+set_option maxHeartbeats 4000000 in
+-- m = 11: the kernel evaluates an Apery table of 484 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem song_thabit_b2n2 : IsGreatest {n : ℕ | ¬ InSG [11, 23, 47, 95] n} 131 := by
+  have h : frobeniusNumber [11, 23, 47, 95] = 131 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [11, 23, 47, 95] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+/- ⚠ DISCREPANCY — Example 3.20.4's genus value.
+   The example specialises Theorem 3.19 to n = 1 and prints
+     g(T_b(1)) = (b⁵+b⁴−b³−b²−2b+4)/2,  giving g(T_3(1)) = 143.
+   Theorem 3.19 at n = 1 gives −4b, not −2b, hence 140.
+   Decisive without any computation: Example 3.20.2 lists the Apéry set
+   itself as {0,35,70,105,107,142,177,212,214,249,284}, which sums to
+   1595, and Lemma 3.3 gives 1595/11 − 5 = 140.
+   Theorem 3.19 is correct; the Example mis-specialises it. -/
+theorem song_thabit_b3n1_genus_TRUE : Set.ncard {n : ℕ | ¬ InSG [11, 35, 107] n} = 140 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [11, 35, 107] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
+
+/- ⚠ DISCREPANCY — Theorem 3.10 is FALSE at n = 0, a case it does not
+   exclude. Example 2.7 gives T_b(0) = ⟨b, b²+b−1⟩, two coprime
+   generators, so Sylvester gives b³ − 3b + 1. Theorem 3.10 gives
+   b³ + b² − 4b + 1 — differing by b² − b, never zero for b ≥ 2.
+   At b = 2: T_2(0) = ⟨2,5⟩. Theorem 3.10 and Example 3.11 both predict
+   F = 5; the true value is 3.
+   Faulty step is Corollary 3.9, which asserts
+     max Ap = (b−1)·s_n + (b−1)·s_{n+1}.
+   At n = 0 that references s_0, but Apéry elements are sums over
+   j = 1..n+1 only (Lemma 3.5) — a coefficient on s_0 would let you
+   subtract s_0 and stay in the semigroup. Valid for n ≥ 1. -/
+theorem song_thabit_n0_TRUE : IsGreatest {n : ℕ | ¬ InSG [2, 5] n} 3 := by
+  have h : frobeniusNumber [2, 5] = 3 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [2, 5] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 2, Corollary 4.6.1, case n = 0. b = 3 (note 3 ≢ 1 mod 3).
+theorem song_2nd_b3n0 : IsGreatest {n : ℕ | ¬ InSG [5, 13] n} 47 := by
+  have h : frobeniusNumber [5, 13] = 47 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 13] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 2, Corollary 4.6.2, case n = 1. b = 2.
+theorem song_2nd_b2n1 : IsGreatest {n : ℕ | ¬ InSG [7, 13, 25] n} 44 := by
+  have h : frobeniusNumber [7, 13, 25] = 44 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [7, 13, 25] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 2, genus at n = 1 (Corollary 4.5.2). Theorem 4.7 states n,b ≥ 2
+-- and gives 28 here, but n = 1 is outside its stated range — not an error.
+theorem song_2nd_b2n1_genus : Set.ncard {n : ℕ | ¬ InSG [7, 13, 25] n} = 26 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [7, 13, 25] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
+
+/- ⚠ DISCREPANCY — Corollary 4.6.3, the n ≥ 2 closed form. As printed:
+     F = b^(2n+3) + b^(2n+2) − b^(2n+1) − b^(2n)
+         + 2b^(n+2) + 2b^(n+1) + 2b²
+   Expanding the corollary's OWN max-Apéry expression
+     2s₁ + (b−1)s_n + (b−1)s_{n+1} − s₀,  with s_i = (b+1)b^(n+i) + 1,
+   gives instead
+     ... + 2b^(n+2) + b^(n+1) − b^n + 2b − 1.
+   At b = 2, n = 2 — generators ⟨13,25,49,97⟩ — printed gives 200, the
+   structural expression gives 2·25 + 49 + 97 − 13 = 183.
+   Refutable with no computation: every numerical semigroup satisfies
+   g ≥ (F+1)/2, and the paper's own Theorem 4.7 gives g = 92 here, so
+   F = 200 would force g ≥ 100.5. With F = 183, (183+1)/2 = 92 exactly —
+   the semigroup is symmetric and everything is consistent. -/
+set_option maxHeartbeats 4000000 in
+-- m = 13: the kernel evaluates an Apery table of 676 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem song_2nd_b2n2_TRUE : IsGreatest {n : ℕ | ¬ InSG [13, 25, 49, 97] n} 183 := by
+  have h : frobeniusNumber [13, 25, 49, 97] = 183 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [13, 25, 49, 97] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+set_option maxHeartbeats 4000000 in
+-- m = 13: the kernel evaluates an Apery table of 676 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem song_2nd_b2n2_genus : Set.ncard {n : ℕ | ¬ InSG [13, 25, 49, 97] n} = 92 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [13, 25, 49, 97] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
+
+-- Family 3, Corollary 5.6.1, case n = 0. SC⁺(b,0) = ⟨2, b+1⟩. b = 10.
+theorem song_cunn_b10n0 : IsGreatest {n : ℕ | ¬ InSG [2, 11] n} 9 := by
+  have h : frobeniusNumber [2, 11] = 9 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [2, 11] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 3, Corollary 5.6.2, case n = 1: F = b³ − 1. b = 2.
+theorem song_cunn_b2n1 : IsGreatest {n : ℕ | ¬ InSG [3, 5] n} 7 := by
+  have h : frobeniusNumber [3, 5] = 7 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [3, 5] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 3, Corollary 5.6.3, case n ≥ 2: F = (b−1)(b^(2n) + b^n + 1).
+theorem song_cunn_b2n2 : IsGreatest {n : ℕ | ¬ InSG [5, 9, 17] n} 21 := by
+  have h : frobeniusNumber [5, 9, 17] = 21 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 9, 17] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+theorem song_cunn_b2n3 : IsGreatest {n : ℕ | ¬ InSG [9, 17, 33, 65] n} 73 := by
+  have h : frobeniusNumber [9, 17, 33, 65] = 73 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [9, 17, 33, 65] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 4, Corollary 6.2: F = b^((b+1)·b^n) − 1. Always 2 generators.
+-- Note SF(2,0) = ⟨3,5⟩ is the same semigroup as SC⁺(2,1) above — two
+-- different families, same instance, so both claims are being checked.
+theorem song_fermat_b2n0 : IsGreatest {n : ℕ | ¬ InSG [3, 5] n} 7 := by
+  have h : frobeniusNumber [3, 5] = 7 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [3, 5] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+theorem song_fermat_b2n1 : IsGreatest {n : ℕ | ¬ InSG [5, 17] n} 63 := by
+  have h : frobeniusNumber [5, 17] = 63 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [5, 17] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+set_option maxHeartbeats 4000000 in
+-- m = 17: the kernel evaluates an Apery table of 578 relaxation steps,
+-- twice, which exceeds the default heartbeat budget.
+theorem song_fermat_b2n2 : IsGreatest {n : ℕ | ¬ InSG [17, 257] n} 4095 := by
+  have h : frobeniusNumber [17, 257] = 4095 := by decide
+  rw [← h]
+  exact frobeniusNumber_isGreatest [17, 257] (by decide) (by decide) (by decide)
+    (by decide) (by decide)
+
+-- Family 4 genus, Corollary 6.2: g = ½·b^((b+1)·b^n).
+theorem song_fermat_b2n0_genus : Set.ncard {n : ℕ | ¬ InSG [3, 5] n} = 4 := by
+  rw [genusApery_eq_ncard_gaps_of_gcd [3, 5] (by decide) (by decide) (by decide)
+    (by decide)]
+  decide
+
+/- TWO MINOR DEFECTS, noted but not counted as discrepancies:
+   • Corollary 5.2 states e(SC⁺(b,n)) = n+1 with no restriction, but
+     Theorem 5.1 requires n ≠ 0, and SC⁺(b,0) = ⟨2, b+1⟩ has embedding
+     dimension 2, not 1. A missing hypothesis, not a false formula.
+   • Lemma 3.4.1 renders in the PDF as s_i + b·s_j = b·s_{i−1} + s_{i+1};
+     the right-hand side should read s_{j+1}. Check at b = 2, n = 2:
+     s₁ + 2s₂ = 23 + 94 = 117 = 2·11 + 95 = b·s₀ + s₃. Typo only. -/

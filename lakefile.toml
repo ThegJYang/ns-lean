@@ -7,6 +7,10 @@ defaultTargets = ["NumSemigroups"]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
+# Mathlib's header linter wants a Mathlib-style copyright block on every file.
+# That is an internal Mathlib convention, not a correctness check, and no file
+# in this project has one. Off, so real warnings are not buried.
+weak.linter.style.header = false
 maxSynthPendingDepth = 3
 
 [[require]]
