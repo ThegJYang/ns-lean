@@ -331,9 +331,22 @@ theorem linrec_nGt1_kSmall_NOFORMULA :
      F = a^(2n+2k+1) - a^(2n+2k) - a^(2n+k+1) - a^(2n+k)
          - a^(n+k) - a^(n+1) + 2a^n - 2a + 3
    For a=3, n=2, k=10 this gives 564839409633, but the true value is
-   564848975571 — short by exactly 2·a^(n+k+2) = 2·3^14 = 9565938. Same
+   564848975571 — short by exactly 2·a^(2n+k) = 2·3^14 = 9565938. Same
    exact offset at k=11 (2·3^15) and k=12 (2·3^16), so it's a systematic
-   missing term, not a rounding artifact. Correct formula adds +2a^(n+k+2).
+   error, not a rounding artifact. The sign on the a^(2n+k) term is
+   wrong; it should be +, giving
+
+     F = a^(2n+2k+1) - a^(2n+2k) - a^(2n+k+1) + a^(2n+k)
+         - a^(n+k) - a^(n+1) + 2a^n - 2a + 3
+
+   CORRECTED 15 Sep 2026.  This comment previously read 2·a^(n+k+2).
+   That is wrong in general: 2n+k and n+k+2 agree only when n = 2, which
+   is the value at all three test points above, so the k=10,11,12 data
+   fits either form.  Evaluating the paper's own Corollary 5.1 at n = 3
+   (k = 28,29,30) and n = 4 (k = 82) separates them — all four match
+   2·a^(2n+k) and none match 2·a^(n+k+2).  The Corollary 5.1 evaluation
+   was validated against the Dijkstra value at a=3, n=2, k=10.
+   See ns-project/discrepancies.md, D3, which had this right.
 
    NOTE: this is the slow one — smallest generator is 531431, so expect
    this single theorem to take minutes under native_decide. Comment it out
