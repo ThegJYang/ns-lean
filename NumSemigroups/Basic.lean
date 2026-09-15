@@ -5,6 +5,25 @@ namespace NumSemigroups
 -- imported alongside Mathlib -- as AperyCorrect, AperyCheck and AperyComplete
 -- all do -- the root names `multiplicity` and `conductor` clash with Mathlib's
 -- own and Lean refuses to merge the environments.
+/- ====================================================================
+   SUPERSEDED: first-iteration bounded-search implementation.
+
+   This block is the original Frobenius-number program: build a
+   reachability table `0..bound` by dynamic programming, then take the
+   largest unreachable entry.  Because that needs a search window, it
+   also needed a *provable* upper bound, which is what the prime-factor
+   and coprime-partner machinery below constructs (Exercise 4.12: pick
+   a generator `a`, build `b ∈ S` coprime to it, use `ab - a - b`).
+
+   Everything here is replaced by the Apéry-set algorithm (`aperySet`,
+   `frobeniusNumber`, `genusApery` below), which needs no bound at all
+   and is the algorithm proved correct in AperyComplete.lean.  Nothing
+   in the live development refers to any of these twelve definitions.
+
+   Kept, commented, as a record of the first iteration.  Uncomment the
+   whole block to restore it.
+   ==================================================================== -/
+/-
 def reachTable (gens : List Nat) (bound : Nat) : Array Bool :=
   (List.range (bound + 1)).foldl
     (fun acc n =>
@@ -113,6 +132,8 @@ def rigorousBoundFull (gens : List Nat) : Nat :=
 to the constructive proof only when needed. -/
 def OLDfrobeniusNumber (gens : List Nat) : Nat :=
   frobeniusUpTo gens (rigorousBoundFull gens)
+-/
+/- ============ end of superseded bounded-search block ============= -/
 
 /-- One residue's turn: if we've already found some way to reach it,
 try extending by each generator and see if that beats the current best
@@ -181,6 +202,21 @@ def genusApery (gens : List Nat) : Nat :=
   let dist := aperySet gens m
   (List.range m).foldl (fun acc r => acc + (dist[r]!).getD 0 / m) 0
 
+/- ====================================================================
+   SUPERSEDED: bounded readouts built on the block above.
+
+   `gapsUpTo` and `genusUpTo` call `reachTable`/`frobeniusUpTo`, so they
+   die with it; `conductor` is unused on its own.  `genusApery` computes
+   the genus with no bound, and `AperyCert.genus` in AperyCorrect.lean
+   is the proved statement about it.
+
+   NOTE: `genusUpTo` was retained as a cross-check on `genusApery` --
+   first iteration checking the second -- but the three examples that
+   performed that check are themselves commented out, in PaperClaims.lean
+   (search for `genusUpTo`).  Uncommenting this block and those examples
+   restores an independent corroboration of the genus computation.
+   ==================================================================== -/
+/-
 /-- The gaps: positive numbers up to `bound` that are NOT in the semigroup.
 Builds the reachability table ONCE and reads it out, rather than calling
 `canMake` per number — `canMake gens n` rebuilds the whole table from
@@ -204,5 +240,7 @@ def conductorUpTo (gens : List Nat) (bound : Nat) : Nat :=
 no search window has to be chosen. Prefer this one. -/
 def conductor (gens : List Nat) : Nat :=
   frobeniusNumber gens + 1
+-/
+/- ============ end of superseded bounded-readout block ============ -/
 
 end NumSemigroups

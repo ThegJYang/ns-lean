@@ -77,3 +77,42 @@ import NumSemigroups.PaperClaims
 #print axioms song_fermat_b2n1
 #print axioms song_fermat_b2n2
 #print axioms song_fermat_b2n0_genus
+
+
+/-  ------------------------------------------------------------------
+    The results of Sections 3 and 4.
+
+    The block above audits the CLAIMS re-checked from the literature.
+    This block audits the THEORY those checks rest on: the correctness
+    of the algorithm itself, and the two formulas for the Frobenius
+    number and the genus.  Without it the paper's primary contribution
+    has no reproducible axiom evidence while its secondary one does.
+
+    Fully qualified because this file does not `open NumSemigroups`.
+
+    Every line should read [propext, Classical.choice, Quot.sound].
+    None of these uses `decide` or `native_decide`, so `native_decide`
+    must not appear anywhere in this block.
+    ------------------------------------------------------------------ -/
+
+-- 3.2  The specification, and what a certified table gives you.
+#print axioms NumSemigroups.AperyCert.mem_iff
+#print axioms NumSemigroups.AperyCert.frobenius
+#print axioms NumSemigroups.AperyCert.genus
+#print axioms NumSemigroups.AperyCert.gaps_finite
+
+-- 3.3  The algorithm always meets the specification.
+#print axioms NumSemigroups.Complete.short_rep
+#print axioms NumSemigroups.Complete.apery_sound
+#print axioms NumSemigroups.Complete.apery_min
+#print axioms NumSemigroups.Complete.hsurj_of_gcd
+#print axioms NumSemigroups.Complete.basic_apery_cert
+
+-- 3.3  The two statements about the functions that actually run.
+#print axioms NumSemigroups.cert_of_gcd
+#print axioms NumSemigroups.frobeniusNumber_isGreatest
+#print axioms NumSemigroups.genusApery_eq_ncard_gaps_of_gcd
+
+-- 4.2  The bridges from the proved definitions to the executable ones.
+#print axioms NumSemigroups.Complete.aperySet_eq
+#print axioms NumSemigroups.frobeniusNumber_eq

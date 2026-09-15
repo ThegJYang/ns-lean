@@ -73,6 +73,12 @@ namespace Complete
 Working with an explicit list, rather than the inductive derivation, is what
 makes the pigeonhole argument possible: a list has positions to compare. -/
 
+/- UNUSED.  The converse direction of `list_of_insg`: every list of
+   generators sums into the semigroup.  Only the forward direction
+   (semigroup element -> list) is needed, since the pigeonhole argument
+   consumes a list and produces a bound, never the reverse.  Kept,
+   commented, because the pair reads as a single characterisation. -/
+/-
 /-- Any list of generators sums into the semigroup. -/
 lemma insg_of_list {gens : List ℕ} :
     ∀ {l : List ℕ}, (∀ x ∈ l, x ∈ gens) → InSG gens l.sum := by
@@ -85,6 +91,7 @@ lemma insg_of_list {gens : List ℕ} :
       have ht : ∀ x ∈ t, x ∈ gens := fun x hx => hl x (by simp [hx])
       have h := InSG.step ha (ih ht)
       simpa [List.sum_cons] using h
+-/
 
 /-- Conversely, every semigroup element is the sum of some list of generators. -/
 lemma list_of_insg {gens : List ℕ} {n : ℕ} (h : InSG gens n) :
@@ -201,7 +208,9 @@ def OLe (x y : Option ℕ) : Prop :=
   | none => True
   | some b => ∃ a, x = some a ∧ a ≤ b
 
-lemma OLe_none (x : Option ℕ) : OLe x none := by trivial
+-- UNUSED.  `OLe x none` holds definitionally, so every call site closes
+-- it with `trivial` directly rather than naming this lemma.
+-- lemma OLe_none (x : Option ℕ) : OLe x none := by trivial
 
 lemma OLe_refl (x : Option ℕ) : OLe x x := by
   cases x with
@@ -591,9 +600,15 @@ lemma size_iter (gens : List ℕ) (m : ℕ) : ∀ (K : ℕ) (dist : Array (Optio
       simp only [List.foldl_cons, List.foldl_nil]
       rw [size_relaxRound, ih]
 
+/- UNUSED.  The table has `m` entries.  `apery_cert` threads the size
+   through with `size_iter`/`size_initA` directly, so this convenience
+   wrapper is never invoked.  It is the statement a reader would expect
+   to exist, so it is kept commented rather than removed. -/
+/-
 lemma size_aperySet (gens : List ℕ) (m : ℕ) : (aperySet gens m).size = m := by
   simp only [aperySet]
   rw [size_iter, size_initA]
+-/
 
 lemma relaxRound_sound (gens : List ℕ) (m : ℕ) (hm : 0 < m) (dist : Array (Option ℕ))
     (hsz : dist.size = m) (hS : Sound gens m dist) : Sound gens m (relaxRound gens m dist) :=
